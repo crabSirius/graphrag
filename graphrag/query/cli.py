@@ -2,7 +2,7 @@
 # Licensed under the MIT License
 
 """Command line interface for the query module."""
-
+import logging
 import os
 from pathlib import Path
 from typing import cast
@@ -118,6 +118,13 @@ def run_global_search(
     result = search_engine.search(query=query)
 
     reporter.success(f"Global Search Response: {result.response}")
+
+
+    logging.info(f"Global Search Response: {result.response}")
+    logging.info(f"Global Search Query: {query}")
+    logging.info(f"LLM call count: {result.llm_calls}")
+    logging.info(f"LLM input tokens: {result.prompt_tokens}")
+    logging.info(f"LLM output tokens: {result.completion_tokens}")
     return result.response
 
 
@@ -185,6 +192,11 @@ def run_local_search(
 
     result = search_engine.search(query=query)
     reporter.success(f"Local Search Response: {result.response}")
+    logging.info(f"Local Search Response: {result.response}")
+    logging.info(f"Local Search Query: {query}")
+    logging.info(f"LLM call count: {result.llm_calls}")
+    logging.info(f"LLM input tokens: {result.prompt_tokens}")
+    logging.info(f"LLM output tokens: {result.completion_tokens}")
     return result.response
 
 

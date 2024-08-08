@@ -31,6 +31,7 @@ class SearchResult:
     completion_time: float
     llm_calls: int
     prompt_tokens: int
+    completion_tokens: int
 
 
 class BaseSearch(ABC):

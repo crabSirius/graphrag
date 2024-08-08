@@ -4,12 +4,17 @@
 """The Query Engine package root."""
 
 import argparse
+import logging
+import logging.config
 from enum import Enum
 
 from .cli import run_global_search, run_local_search
 
 INVALID_METHOD_ERROR = "Invalid method"
 
+
+logging.config.fileConfig('logging.ini')
+logger = logging.getLogger('graphrag')
 
 class SearchType(Enum):
     """The type of search to run."""
@@ -78,6 +83,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    args.data = r'E:\codes\RAG\graphrag\ISV_prompt_tune\output\20240729-171150\artifacts'
+    args.root = r'E:\codes\RAG\graphrag'
+    args.community_level = 2
+    args.method = SearchType.LOCAL
+    args.query = [r'接入哪些平台需要收费，费用分别是多少?']
+    # args.query = [r'广告平台接入了哪些？']
+    # args.query = [r'预策魔方可以对接哪些广告平台']
     match args.method:
         case SearchType.LOCAL:
             run_local_search(
@@ -99,3 +111,27 @@ if __name__ == "__main__":
             )
         case _:
             raise ValueError(INVALID_METHOD_ERROR)
+
+    # args.query = [r'可以对接哪些平台', "广告平台接入了哪些", "接入平台的收费情况", "小红书有哪些接口可以提供",
+    #               "淘宝万相台授权失败", "京东ISV订单已经接入，但是财务账单提示失败"]
+    # method = [SearchType.GLOBAL]
+    # for m in method:
+    #     for q in args.query:
+    #         if m == SearchType.LOCAL:
+    #             run_local_search(
+    #                 args.data,
+    #                 args.root,
+    #                 args.community_level,
+    #                 args.response_type,
+    #                 q,
+    #             )
+    #         elif m == SearchType.GLOBAL:
+    #             run_global_search(
+    #                 args.data,
+    #                 args.root,
+    #                 args.community_level,
+    #                 args.response_type,
+    #                 q,
+    #             )
+    #         else:
+    #             raise ValueError(INVALID_METHOD_ERROR)

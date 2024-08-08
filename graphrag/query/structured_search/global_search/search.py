@@ -134,6 +134,7 @@ class GlobalSearch(BaseSearch):
                 callback.on_map_response_end(map_responses)
         map_llm_calls = sum(response.llm_calls for response in map_responses)
         map_prompt_tokens = sum(response.prompt_tokens for response in map_responses)
+        map_response_tokens = sum(response.completion_tokens for response in map_responses)
 
         # Step 2: Combine the intermediate answers from step 2 to generate the final answer
         reduce_response = await self._reduce_response(
@@ -152,6 +153,7 @@ class GlobalSearch(BaseSearch):
             completion_time=time.time() - start_time,
             llm_calls=map_llm_calls + reduce_response.llm_calls,
             prompt_tokens=map_prompt_tokens + reduce_response.prompt_tokens,
+            completion_tokens=num_tokens(reduce_response.response, self.token_encoder) + map_response_tokens,
         )
 
     def search(
@@ -178,6 +180,7 @@ class GlobalSearch(BaseSearch):
                 {"role": "system", "content": search_prompt},
                 {"role": "user", "content": query},
             ]
+            logging.info("search_messages: %s", search_messages)
             async with self.semaphore:
                 search_response = await self.llm.agenerate(
                     messages=search_messages, streaming=False, **llm_kwargs
@@ -204,6 +207,7 @@ class GlobalSearch(BaseSearch):
                 completion_time=time.time() - start_time,
                 llm_calls=1,
                 prompt_tokens=num_tokens(search_prompt, self.token_encoder),
+                completion_tokens=num_tokens(search_response, self.token_encoder)
             )
 
         except Exception:
@@ -293,6 +297,7 @@ class GlobalSearch(BaseSearch):
                     completion_time=time.time() - start_time,
                     llm_calls=0,
                     prompt_tokens=0,
+                    completion_tokens=0,
                 )
 
             filtered_key_points = sorted(
@@ -332,7 +337,7 @@ class GlobalSearch(BaseSearch):
                 {"role": "system", "content": search_prompt},
                 {"role": "user", "content": query},
             ]
-
+            logging.info("search_messages: %s", search_messages)
             search_response = await self.llm.agenerate(
                 search_messages,
                 streaming=True,
@@ -346,6 +351,7 @@ class GlobalSearch(BaseSearch):
                 completion_time=time.time() - start_time,
                 llm_calls=1,
                 prompt_tokens=num_tokens(search_prompt, self.token_encoder),
+                completion_tokens=num_tokens(search_response, self.token_encoder),
             )
         except Exception:
             log.exception("Exception in reduce_response")
@@ -356,4 +362,5 @@ class GlobalSearch(BaseSearch):
                 completion_time=time.time() - start_time,
                 llm_calls=1,
                 prompt_tokens=num_tokens(search_prompt, self.token_encoder),
+                completion_tokens=0,
             )

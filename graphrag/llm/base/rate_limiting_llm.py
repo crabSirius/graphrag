@@ -205,4 +205,9 @@ class RateLimitingLLM(LLM[TIn, TOut], Generic[TIn, TOut]):
             result.input_tokens,
             result.output_tokens,
         )
+        log.info(
+            '\n[\'**input_tokens\':%d, \'**output_tokens\':%d]',
+            result.input_tokens,
+            result.output_tokens,
+        )
         self._on_invoke(result)

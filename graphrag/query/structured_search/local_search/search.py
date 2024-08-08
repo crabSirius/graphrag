@@ -130,6 +130,7 @@ class LocalSearch(BaseSearch):
                 {"role": "system", "content": search_prompt},
                 {"role": "user", "content": query},
             ]
+            logging.info("search_messages: %s", search_messages)
 
             response = self.llm.generate(
                 messages=search_messages,
@@ -145,6 +146,7 @@ class LocalSearch(BaseSearch):
                 completion_time=time.time() - start_time,
                 llm_calls=1,
                 prompt_tokens=num_tokens(search_prompt, self.token_encoder),
+                completion_tokens=num_tokens(response, self.token_encoder),
             )
 
         except Exception:

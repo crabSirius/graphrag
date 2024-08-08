@@ -46,9 +46,7 @@ class ClaimExtractionConfig(LLMConfig):
             "type": ExtractClaimsStrategyType.graph_intelligence,
             "llm": self.llm.model_dump(),
             **self.parallelization.model_dump(),
-            "extraction_prompt": (Path(root_dir) / self.prompt)
-            .read_bytes()
-            .decode(encoding="utf-8")
+            "extraction_prompt": (Path(root_dir) / self.prompt).read_text(encoding="utf-8")
             if self.prompt
             else None,
             "claim_description": self.description,
