@@ -91,6 +91,7 @@ class GraphExtractor:
         yes = encoding.encode("YES")
         no = encoding.encode("NO")
         self._loop_args = {"logit_bias": {yes[0]: 100, no[0]: 100}, "max_tokens": 1}
+        self._source_text_cache = {}
 
     async def __call__(
         self, texts: list[str], prompt_variables: dict[str, Any] | None = None
@@ -136,6 +137,7 @@ class GraphExtractor:
 
         output = await self._process_results(
             all_records,
+            source_doc_map,
             prompt_variables.get(self._tuple_delimiter_key, DEFAULT_TUPLE_DELIMITER),
             prompt_variables.get(self._record_delimiter_key, DEFAULT_RECORD_DELIMITER),
         )
@@ -181,9 +183,23 @@ class GraphExtractor:
 
         return results
 
+    def _entity_is_in_text(self, entity_name_str: str, text: str, text_id: str):
+        """Check if an entity is present in a given text."""
+        if text_id in self._source_text_cache:
+            new_text = self._source_text_cache[text_id]
+        else:
+            new_text = text.strip().upper().replace(" ", "").replace("_", "").replace("-", "")
+            self._source_text_cache[text_id] = new_text
+        entity_name_str = entity_name_str.strip().upper().replace(" ", "").replace("_", "").replace("-", "")
+        match = entity_name_str in new_text
+        if not match:
+            print(f"Entity {entity_name_str} not found in text {text}")
+        return match
+
     async def _process_results(
         self,
         results: dict[int, str],
+        src_doc: dict[int, str],
         tuple_delimiter: str,
         record_delimiter: str,
     ) -> nx.Graph:
@@ -196,9 +212,11 @@ class GraphExtractor:
         Returns:
             - output - unipartite graph in graphML format
         """
+
         graph = nx.Graph()
         for source_doc_id, extracted_data in results.items():
             records = [r.strip() for r in extracted_data.split(record_delimiter)]
+            source_text = src_doc[source_doc_id]
 
             for record in records:
                 record = re.sub(r"^\(|\)$", "", record.strip())
@@ -209,6 +227,10 @@ class GraphExtractor:
                     entity_name = clean_str(record_attributes[1].upper())
                     entity_type = clean_str(record_attributes[2].upper())
                     entity_description = clean_str(record_attributes[3])
+
+                    if not self._entity_is_in_text(entity_name, source_text, source_doc_id):
+                        print(entity_name)
+                        print(source_text)
 
                     if entity_name in graph.nodes():
                         node = graph.nodes[entity_name]
@@ -246,6 +268,12 @@ class GraphExtractor:
                     # add this record as edge
                     source = clean_str(record_attributes[1].upper())
                     target = clean_str(record_attributes[2].upper())
+                    if not self._entity_is_in_text(source, source_text, source_doc_id):
+                        print(source)
+                        print(source_text)
+                    if not self._entity_is_in_text(target, source_text, source_doc_id):
+                        print(target)
+                        print(source_text)
                     edge_description = clean_str(record_attributes[3])
                     edge_source_id = clean_str(str(source_doc_id))
                     weight = (
