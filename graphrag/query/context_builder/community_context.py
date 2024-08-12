@@ -160,7 +160,8 @@ def build_community_context(
     # add the last batch if it has not been added
     if batch_text not in all_context_text:
         _cut_batch()
-
+    if all_context_text is None or len(all_context_text) == 0:
+        return ([], {})
     return all_context_text, {
         context_name.lower(): pd.concat(all_context_records, ignore_index=True)
     }
