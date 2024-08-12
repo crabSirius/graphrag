@@ -85,14 +85,14 @@ if __name__ == "__main__":
 
     args.data = r'E:\codes\RAG\graphrag\ISV_prompt_tune_v2\output\20240806-193811\artifacts'
     args.data = r'E:\codes\RAG\graphrag\ISV_prompt_tune\output\20240729-171150\artifacts'
-    args.data = r'E:\codes\RAG\graphrag\ISV_v2\output\20240807-113102\artifacts'
+    args.data = r'E:\codes\RAG\graphrag\ISV_prompt_tune_v2\output\20240809-180652\artifacts'
     args.root = r'E:\codes\RAG\graphrag'
     args.community_level = 2
     args.method = SearchType.LOCAL
     args.query = [r'接入哪些平台需要收费，费用分别是多少?']
     # args.query = [r'广告平台接入了哪些？']
     # args.query = [r'预策魔方可以对接哪些广告平台']
-    args.query = [r'预策数据魔方可以对接哪些平台？魔方、预策魔方、数据魔方、魔方平台都是预策数据魔方的简称。']
+    args.query = [r'预策数据魔方可以对接哪些平台？']
     match args.method:
         case SearchType.LOCAL:
             run_local_search(
