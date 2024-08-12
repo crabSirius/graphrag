@@ -106,9 +106,6 @@ def merge_graphs(
     return TableContainer(table=output)
 
 
-# 同义词map定义
-synonyms_list = ['魔方', '数据魔方', '魔方平台', '预策数据魔方']
-
 def merge_nodes(
     target: nx.Graph,
     subgraph: nx.Graph,
@@ -116,18 +113,6 @@ def merge_nodes(
 ):
     """Merge nodes from subgraph into target using the operations defined in node_ops."""
     for node in subgraph.nodes:
-        if node in target.nodes:
-            merge_attributes(target.nodes[node], subgraph.nodes[node], node_ops)
-            continue
-        if node in synonyms_list:
-            match = False
-            for name in synonyms_list:
-                if name in target.nodes:
-                    merge_attributes(target.nodes[name], subgraph.nodes[node], node_ops)
-                    match = True
-                    break
-            if match:
-                continue
         if node not in target.nodes:
             target.add_node(node, **(subgraph.nodes[node] or {}))
         else:

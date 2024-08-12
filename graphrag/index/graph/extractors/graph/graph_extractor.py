@@ -92,6 +92,7 @@ class GraphExtractor:
         no = encoding.encode("NO")
         self._loop_args = {"logit_bias": {yes[0]: 100, no[0]: 100}, "max_tokens": 1}
         self._source_text_cache = {}
+        self._synonyms_map_dict = {'预策数据魔方': ['魔方', '数据魔方', '魔方平台']}
 
     async def __call__(
         self, texts: list[str], prompt_variables: dict[str, Any] | None = None
@@ -196,6 +197,12 @@ class GraphExtractor:
             print(f"Entity {entity_name_str} not found in text {text}")
         return match
 
+    def _synonyms_map(self, entity_name):
+        for k, v in self._synonyms_map_dict.items():
+            if entity_name in v:
+                return k
+        return entity_name
+
     async def _process_results(
         self,
         results: dict[int, str],
@@ -225,6 +232,7 @@ class GraphExtractor:
                 if record_attributes[0] == '"entity"' and len(record_attributes) >= 4:
                     # add this record as a node in the G
                     entity_name = clean_str(record_attributes[1].upper())
+                    entity_name = self._synonyms_map(entity_name)
                     entity_type = clean_str(record_attributes[2].upper())
                     entity_description = clean_str(record_attributes[3])
 
@@ -268,6 +276,8 @@ class GraphExtractor:
                     # add this record as edge
                     source = clean_str(record_attributes[1].upper())
                     target = clean_str(record_attributes[2].upper())
+                    source = self._synonyms_map(source)
+                    target = self._synonyms_map(target)
                     if not self._entity_is_in_text(source, source_text, source_doc_id):
                         print(source)
                         print(source_text)
