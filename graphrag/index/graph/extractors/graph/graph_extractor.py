@@ -92,7 +92,17 @@ class GraphExtractor:
         no = encoding.encode("NO")
         self._loop_args = {"logit_bias": {yes[0]: 100, no[0]: 100}, "max_tokens": 1}
         self._source_text_cache = {}
-        self._synonyms_map_dict = {'预策数据魔方': ['魔方', '数据魔方', '魔方平台']}
+        self._synonyms_map_dict = {
+            '预策数据魔方': ['魔方', '数据魔方', '魔方平台'],
+            '订单信息': ['订单', '订单信息', '订单列表信息'],
+            '销售订单': ['销售订单', '销售订单信息'],
+            'APP KEY': ['APP KEY', 'APP_KEY', 'APPKEY'],
+            'APP SECRET': ['APP SECRET', 'APP_SECRET', 'APPSECRET'],
+            '商家自研': ['商家自研', '商家自研模式'],
+            'ISV': ['ISV', 'ISV模式', 'ISV对接', 'ISV接入方式'],
+            '无费用': ['无', '无费用', '无需订购'],
+            '预策ERP服务': ['预策ERP服务', '预策ERP'],
+        }
 
     async def __call__(
         self, texts: list[str], prompt_variables: dict[str, Any] | None = None
