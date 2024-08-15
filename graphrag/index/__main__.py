@@ -51,6 +51,7 @@ if __name__ == "__main__":
         "--emit",
         help="The data formats to emit, comma-separated. Valid values are 'parquet' and 'csv'. default='parquet,csv'",
         type=str,
+        default="parquet,csv",
     )
     parser.add_argument(
         "--dryrun",
