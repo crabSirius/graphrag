@@ -1,0 +1,133 @@
+
+-Goal-
+Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.
+
+-Steps-
+1. Identify all entities. For each identified entity, extract the following information:
+- entity_name: Name of the entity, capitalized
+- entity_type: One of the following types: [platform, integration_mode, authorization_method, subscription_fee, data_type, data_sync_time, data_scope, application, store, connector, service_provider, account, transaction, order, product, refund, advertising, merchant]
+- entity_description: Comprehensive description of the entity's attributes and activities
+Format each entity as ("entity"{tuple_delimiter}<entity_name>{tuple_delimiter}<entity_type>{tuple_delimiter}<entity_description>)
+
+2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
+For each pair of related entities, extract the following information:
+- source_entity: name of the source entity, as identified in step 1
+- target_entity: name of the target entity, as identified in step 1
+- relationship_description: explanation as to why you think the source entity and the target entity are related to each other
+- relationship_strength: an integer score between 1 to 10, indicating strength of the relationship between the source entity and target entity
+Format each relationship as ("relationship"{tuple_delimiter}<source_entity>{tuple_delimiter}<target_entity>{tuple_delimiter}<relationship_description>{tuple_delimiter}<relationship_strength>)
+
+3. Return output in The primary language of the provided text is "Chinese." as a single list of all the entities and relationships identified in steps 1 and 2. Use **{record_delimiter}** as the list delimiter.
+
+4. If you have to translate into The primary language of the provided text is "Chinese.", just translate the descriptions, nothing else!
+
+5. When finished, output {completion_delimiter}.
+
+-Examples-
+######################
+
+Example 1:
+
+entity_types: [platform, integration_mode, authorization_method, subscription_fee, data_type, data_sync_time, data_scope, application, store, connector, service_provider, account, transaction, order, product, refund, advertising, merchant]
+text:
+a915de761d803c49067452f6a82fa3b.png
+
+2、应用连接数据同步
+魔方--》数据--》添加应用--》选择商家自研
+应用标识：default
+选择需要数据进行同步
+
+
+------------------------
+output:
+("entity"{tuple_delimiter}魔方{tuple_delimiter}application{tuple_delimiter}魔方是一个应用程序，用于数据同步)
+{record_delimiter}
+("entity"{tuple_delimiter}数据{tuple_delimiter}data_type{tuple_delimiter}数据是需要进行同步的信息)
+{record_delimiter}
+("entity"{tuple_delimiter}商家自研{tuple_delimiter}merchant{tuple_delimiter}商家自研是指商家自己开发的应用程序)
+{record_delimiter}
+("relationship"{tuple_delimiter}魔方{tuple_delimiter}数据{tuple_delimiter}魔方应用程序用于数据同步{tuple_delimiter}8)
+{record_delimiter}
+("relationship"{tuple_delimiter}魔方{tuple_delimiter}商家自研{tuple_delimiter}魔方应用程序可以选择商家自研的应用进行数据同步{tuple_delimiter}7)
+{completion_delimiter}
+#############################
+
+
+Example 2:
+
+entity_types: [platform, integration_mode, authorization_method, subscription_fee, data_type, data_sync_time, data_scope, application, store, connector, service_provider, account, transaction, order, product, refund, advertising, merchant]
+text:
+得物电商平台【ISV】对接V2.0
+一、平台对接模式：ISV模式
+1、订购方式
+       应用授权
+2、订购费用
+费用：无
+二、对接方案
+1、对接方案概述
+对接得物店铺下的订单信息、商品信息、售后仲裁信息、直退卖家售后单列表信息
+2、数据获取时间
+应用授权日前近90天数据&售前后的增量数据
+3、对接数据范围
+
+三、授权操作手册
+1、魔方添平台授权
+魔方--》数据--》添加得物平台--》创建店铺--》点击授权链接--》店铺进行
+------------------------
+output:
+("entity"{tuple_delimiter}得物电商平台{tuple_delimiter}platform{tuple_delimiter}得物电商平台是一个电子商务平台，提供商品销售和订单管理服务)
+{record_delimiter}
+("entity"{tuple_delimiter}ISV模式{tuple_delimiter}integration_mode{tuple_delimiter}ISV模式是一种平台对接模式，允许独立软件供应商与平台进行集成)
+{record_delimiter}
+("entity"{tuple_delimiter}应用授权{tuple_delimiter}authorization_method{tuple_delimiter}应用授权是一种订购方式，用户通过授权应用来访问平台数据)
+{record_delimiter}
+("entity"{tuple_delimiter}无{tuple_delimiter}subscription_fee{tuple_delimiter}订购费用为零，即用户无需支付费用即可使用该服务)
+{record_delimiter}
+("entity"{tuple_delimiter}订单信息{tuple_delimiter}data_type{tuple_delimiter}订单信息包括用户在平台上生成的所有订单的详细信息)
+{record_delimiter}
+("entity"{tuple_delimiter}商品信息{tuple_delimiter}data_type{tuple_delimiter}商品信息包括平台上销售的所有商品的详细描述和属性)
+{record_delimiter}
+("entity"{tuple_delimiter}售后仲裁信息{tuple_delimiter}data_type{tuple_delimiter}售后仲裁信息包括用户在售后服务过程中产生的仲裁记录)
+{record_delimiter}
+("entity"{tuple_delimiter}直退卖家售后单列表信息{tuple_delimiter}data_type{tuple_delimiter}直退卖家售后单列表信息包括直接退货给卖家的售后订单列表)
+{record_delimiter}
+("entity"{tuple_delimiter}近90天数据{tuple_delimiter}data_sync_time{tuple_delimiter}应用授权日前近90天的数据，包括订单和商品信息)
+{record_delimiter}
+("entity"{tuple_delimiter}售前后的增量数据{tuple_delimiter}data_sync_time{tuple_delimiter}售前后的增量数据指的是在售前和售后期间新增或更新的数据)
+{record_delimiter}
+("entity"{tuple_delimiter}魔方平台{tuple_delimiter}platform{tuple_delimiter}魔方平台是一个数据管理平台，支持与得物电商平台的集成)
+{record_delimiter}
+("entity"{tuple_delimiter}店铺{tuple_delimiter}store{tuple_delimiter}店铺是指在得物电商平台上创建的销售商品的虚拟商店)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}ISV模式{tuple_delimiter}得物电商平台采用ISV模式进行平台对接{tuple_delimiter}8)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}应用授权{tuple_delimiter}得物电商平台通过应用授权方式进行订购{tuple_delimiter}7)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}无{tuple_delimiter}得物电商平台的订购费用为零{tuple_delimiter}6)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}订单信息{tuple_delimiter}得物电商平台对接订单信息{tuple_delimiter}9)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}商品信息{tuple_delimiter}得物电商平台对接商品信息{tuple_delimiter}9)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}售后仲裁信息{tuple_delimiter}得物电商平台对接售后仲裁信息{tuple_delimiter}8)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}直退卖家售后单列表信息{tuple_delimiter}得物电商平台对接直退卖家售后单列表信息{tuple_delimiter}8)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}近90天数据{tuple_delimiter}得物电商平台获取近90天的数据{tuple_delimiter}7)
+{record_delimiter}
+("relationship"{tuple_delimiter}得物电商平台{tuple_delimiter}售前后的增量数据{tuple_delimiter}得物电商平台获取售前后的增量数据{tuple_delimiter}7)
+{record_delimiter}
+("relationship"{tuple_delimiter}魔方平台{tuple_delimiter}得物电商平台{tuple_delimiter}魔方平台与得物电商平台进行数据集成{tuple_delimiter}8)
+{record_delimiter}
+("relationship"{tuple_delimiter}魔方平台{tuple_delimiter}店铺{tuple_delimiter}魔方平台支持在得物电商平台上创建店铺{tuple_delimiter}7)
+{completion_delimiter}
+#############################
+
+
+
+-Real Data-
+######################
+entity_types: [platform, integration_mode, authorization_method, subscription_fee, data_type, data_sync_time, data_scope, application, store, connector, service_provider, account, transaction, order, product, refund, advertising, merchant]
+text: {input_text}
+######################
+output:
