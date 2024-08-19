@@ -19,7 +19,7 @@ from graphrag.index.typing import ErrorHandlerFn
 from graphrag.index.utils import clean_str
 from graphrag.llm import CompletionLLM
 
-from .prompts import CONTINUE_PROMPT, GRAPH_EXTRACTION_PROMPT, LOOP_PROMPT
+from .prompts import CONTINUE_PROMPT, GRAPH_EXTRACTION_PROMPT, LOOP_PROMPT, ADDITIONAL_PROMPT
 
 DEFAULT_TUPLE_DELIMITER = "<|>"
 DEFAULT_RECORD_DELIMITER = "##"
@@ -102,6 +102,32 @@ class GraphExtractor:
             'ISV': ['ISV', 'ISV模式', 'ISV对接', 'ISV接入方式'],
             '无费用': ['无', '无费用', '无需订购'],
             '预策ERP服务': ['预策ERP服务', '预策ERP'],
+            '快手-磁力金牛': ['磁力金牛', '快手-磁力金牛', '快手-磁力金牛平台', '快手磁力金牛开放平台'],
+            '聚水潭开放平台': ['聚水潭', '聚水潭开放平台'],
+            '班牛开放平台': ['班牛开放平台', '班牛平台', '班牛'],
+        }
+        self._relation_map_dict = {
+            '旺店通开放平台':
+                {
+                    'relation': {'source': '预策数据魔方', 'target': '旺店通开放平台', 'relation_description': '预策数据魔方支持接入旺店通开放平台'},
+                    'done_flag': False
+                },
+            '宜搭':
+                {
+                    'relation': {'source': '预策数据魔方', 'target': '宜搭',
+                                 'relation_description': '预策数据魔方支持接入钉钉宜搭平台'},
+                    'done_flag': False
+                },
+            '班牛开放平台':
+                {
+                    'relation': {'source': '预策数据魔方', 'target': '班牛开放平台',
+                                 'relation_description': '预策数据魔方支持接入班牛开放平台'},
+                    'done_flag': False
+                },
+        }
+        self._additional_entities = {
+            '巨量千川-PC': [],
+            '巨量千川-随心推': ['预策数据魔方', '巨量千川-随心推'],
         }
 
     async def __call__(
@@ -158,6 +184,17 @@ class GraphExtractor:
             source_docs=source_doc_map,
         )
 
+    def _check_additional_entities(self, results, text):
+        # todo 优化_add_entities与对应chunk匹配的判断
+        entities = []
+        relationships = []
+        for entity in self._additional_entities:
+            if entity in text and entity not in results:
+                entities.append(entity)
+                if len(self._additional_entities[entity]) == 2:
+                    relationships.append("->".join(self._additional_entities[entity]))
+        return entities, relationships
+
     async def _process_document(
         self, text: str, prompt_variables: dict[str, str]
     ) -> str:
@@ -191,6 +228,20 @@ class GraphExtractor:
             )
             if response.output != "YES":
                 break
+        additional_entities, additional_relationships = self._check_additional_entities(results, text)
+        if len(additional_entities) > 0:
+            additional_entities = '"、"'.join(additional_entities).join(['"', '"'])
+            additional_relationships = '"、"'.join(additional_relationships).join(['"', '"'])
+            response = await self._llm(
+                ADDITIONAL_PROMPT,
+                name=f"additional_entities",
+                variables={
+                    "additional_entities": additional_entities,
+                    "additional_relationships": additional_relationships
+                },
+                history=response.history,
+            )
+            results += response.output or ""
 
         return results
 
@@ -212,6 +263,40 @@ class GraphExtractor:
             if entity_name in v:
                 return k
         return entity_name
+
+    def _add_relations(self, graph, source_doc_id):
+        for k, v in self._relation_map_dict.items():
+            flag = v['done_flag']
+            if flag:
+                continue
+            source = v['relation']['source']
+            target = v['relation']['target']
+            relation_description = v['relation']['relation_description']
+            edge_source_id = clean_str(str(source_doc_id))
+            if k in graph.nodes:
+                if not graph.has_edge(source, target):
+                    if source not in graph.nodes():
+                        graph.add_node(
+                            source,
+                            type="",
+                            description="",
+                            source_id=edge_source_id,
+                        )
+                    if target not in graph.nodes():
+                        graph.add_node(
+                            target,
+                            type="",
+                            description="",
+                            source_id=edge_source_id,
+                        )
+                    graph.add_edge(
+                        source,
+                        target,
+                        weight=1.0,
+                        description=relation_description,
+                        source_id=edge_source_id,
+                    )
+                    self._relation_map_dict[k]['done_flag'] = True
 
     async def _process_results(
         self,
@@ -339,7 +424,7 @@ class GraphExtractor:
                         description=edge_description,
                         source_id=edge_source_id,
                     )
-
+            self._add_relations(graph, source_doc_id)
         return graph
 
 

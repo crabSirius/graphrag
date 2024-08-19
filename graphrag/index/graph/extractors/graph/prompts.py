@@ -127,3 +127,4 @@ Output:"""
 
 CONTINUE_PROMPT = "MANY entities and relationships were missed in the last extraction. Remember to ONLY emit entities that match any of the previously extracted types. Add them below using the same format:\n"
 LOOP_PROMPT = "It appears some entities and relationships may have still been missed.  Answer YES | NO if there are still entities or relationships that need to be added.\n"
+ADDITIONAL_PROMPT = "The entities {additional_entities} their corresponding relationships were missed in the last extraction. The relationships {additional_relationships} were missed in the last extraction. Remember to ONLY emit entities that match any of the previously extracted types. Add them below using the same format:\n"
